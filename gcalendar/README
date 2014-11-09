@@ -1,0 +1,3 @@
+Dependencies:
+    pycrypto
+    google-api-python-client
