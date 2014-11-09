@@ -7,19 +7,22 @@ execfile('gauth.cfg', config)
 
 clientEmail = config['email']
 keyFile = config['keyfile']
-scope = config['scope']
 
-print "{} {} {}".format(clientEmail, keyFile, scope)
-
-def authenticate():
-    """
-    authenticate with google calendar. Uses OAuth2.0
-    """
-
+def read_key():
     with open(keyFile) as f:    
         privateKey = f.read()
+
+    return privateKey
+
+def authenticate(app, version, scope, sub=None):
+    privateKey = read_key()
+
+    if (not sub):
         credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope)
+    else:
+        credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, sub)
+
 
     httpAuth = credentials.authorize(Http())
-    service = build('calendar', 'v3', http=httpAuth)
+    service = build(app, version, http=httpAuth)
     return service
