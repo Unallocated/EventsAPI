@@ -16,7 +16,7 @@ post = {
         }
     }
 
-service = authenticate.authenticate(app, version, scope, user)
+service = authenticate.authenticate(app, version, scope, sub='uas.events.tester@gmail.com')
 
 def create_post():
     return service.activities().insert(userId = user, body = post).execute()

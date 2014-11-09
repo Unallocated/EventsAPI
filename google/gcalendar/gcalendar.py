@@ -1,4 +1,5 @@
-import auth.authenticate, json
+import google.auth.authenticate
+import json
 
 calId = 'primary' 
 scope = 'https://www.googleapis.com/auth/calendar'
