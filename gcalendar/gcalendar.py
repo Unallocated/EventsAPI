@@ -1,5 +1,4 @@
-import authenticate
-import json
+import authenticate, json
 
 calId = 'primary' 
 
