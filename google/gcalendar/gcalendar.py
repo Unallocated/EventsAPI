@@ -1,7 +1,8 @@
-import authenticate
+import google.auth.authenticate
 import json
 
 calId = 'primary' 
+scope = 'https://www.googleapis.com/auth/calendar'
 
 event = {
     'summary': 'hackathon',
@@ -39,7 +40,7 @@ eventUpdate = {
         ]
     }
 
-service = authenticate.authenticate()
+service = authenticate.authenticate(app, version, scope, user)
 
 def create_event(event_body, notify=False):
     """
