@@ -1,5 +1,0 @@
-summary
-start
-end
-location
-recurrence
