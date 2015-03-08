@@ -9,20 +9,21 @@ clientEmail = config['email']
 keyFile = config['keyfile']
 
 def read_key():
-    with open(keyFile) as f:    
-        privateKey = f.read()
+	with open(keyFile) as f:    
+		privateKey = f.read()
 
-    return privateKey
+	return privateKey
 
 def authenticate(app, version, scope, sub=None):
-    privateKey = read_key()
+	privateKey = read_key()
+	
+	if (not sub):
+		credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope)
+	else:
+		credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, sub)
+	
+	http = Http()
+	httpAuth = credentials.authorize(http)
+	service = build(app, version, http=http)
+	return service
 
-    if (not sub):
-        credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope)
-    else:
-        credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, sub)
-
-
-    httpAuth = credentials.authorize(Http())
-    service = build(app, version, http=httpAuth)
-    return service
