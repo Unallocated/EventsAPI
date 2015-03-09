@@ -22,7 +22,6 @@ def authenticate(app, version, scope, sub=None):
     else:
         credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, sub)
 
-
     httpAuth = credentials.authorize(Http())
     service = build(app, version, http=httpAuth)
     return service
