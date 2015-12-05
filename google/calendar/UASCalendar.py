@@ -43,22 +43,22 @@ class EventBody:
 		self.obj = obj
 
 	def getSummary(self):
-		return self.obj.summary
+		return self.obj['summary']
 
 	def getDescription(self):
-		return self.obj.description
+		return self.obj['description']
 
 	def getStartTime(self):
-		return self.obj.startTime
+		return self.obj['startTime']
 
 	def getEndTime(self):
-		return self.obj.endTime
+		return self.obj['endTime']
 
 	def getRecurrances(self):
-		return self.obj.recurrances
+		return self.obj['recurrances']
 
 	def hasRecurrances(self):
-		return not self.obj.recurrances == None
+		return not self.obj['recurrances'] == None
 	
 	def getObj(self):
 		print "OBJ: ",self.obj 
