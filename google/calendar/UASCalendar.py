@@ -23,19 +23,14 @@ class EventBody:
 	
 	def __init__(self, summary, description, startTime, endTime, recurrances=None):
 		obj = {
-			'attendees' : [{ 'email' : 'dmp250net@gmail.com'}],
-			#'summary' : summary,
-			'summary' : 'This is a test',
+			'summary' : summary,
 			'location' : '501 Shaw Ct',
-			#'description' : description,
-			#'description' : 'fsdfsdfsdfsdf',
+			'description' : description,
 			'start' : {
-				#'timeZone' : 'America/New_York',
-				'dateTime' : '2015-03-10T11:00:00.000-06:00' #startTime.replace(' ', 'T')
+        'dateTime': startTime
 			},
 			'end' : {
-				#'timeZone' : 'America/New_York',
-				'dateTime' : '2015-03-10T12:00:00.000-06:00' #endTime.replace(' ', 'T')
+        'dateTime': endTime
 			}
 		}
 
