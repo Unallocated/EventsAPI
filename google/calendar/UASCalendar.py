@@ -4,6 +4,15 @@ class UASCalendar:
     __calendar_id = 'primary'
     __service = authenticate.authenticate('calendar', 'v3', 'https://www.googleapis.com/auth/calendar')
     
+    def create_calendar(self, calendarName):
+        resp = self.__service.calendars().insert(body={'summary': calendarName, 'timeZone' : 'America/New_York'}).execute()
+        return resp
+
+    def list_calendars(self):
+        pageToken = None
+        cals = self.__service.calendarList().list(pageToken=pageToken).execute()
+        print cals
+
     def create_event(self, event_body, notify=False):
         event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body.obj).execute()
         print event.get('htmlLink')
