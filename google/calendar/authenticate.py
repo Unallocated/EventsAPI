@@ -7,6 +7,7 @@ execfile('gauth.cfg', config)
 
 clientEmail = config['email']
 keyFile = config['keyfile']
+keyPass = config['keypass']
 
 def read_key():
 	with open(keyFile) as f:    
@@ -18,9 +19,9 @@ def authenticate(app, version, scope, sub=None):
 	privateKey = read_key()
 	
 	if (not sub):
-		credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope)
+		credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, private_key_password=keyPass)
 	else:
-		credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, sub)
+		credentials = SignedJwtAssertionCredentials(clientEmail, privateKey, scope, sub=sub, private_key_password=keyPass)
 	
 	http = Http()
 	httpAuth = credentials.authorize(http)
