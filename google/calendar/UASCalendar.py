@@ -5,9 +5,8 @@ class UASCalendar:
     __service = authenticate.authenticate('calendar', 'v3', 'https://www.googleapis.com/auth/calendar')
     
     def create_event(self, event_body, notify=False):
-        event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body).execute()
-        print event
-				#return event['id']
+        event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body.obj).execute()
+        return event
 
     def delete_event(event_id, notify=False):
         self.__service.events().delete(calendarId=self.__calendar_id, eventId=event_id, sendNotifications=notify)
