@@ -5,9 +5,8 @@ class UASCalendar:
     __service = authenticate.authenticate('calendar', 'v3', 'https://www.googleapis.com/auth/calendar')
     
     def create_event(self, event_body, notify=False):
-        event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body).execute()
-        print event
-				#return event['id']
+        event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body.obj).execute()
+        return event
 
     def delete_event(event_id, notify=False):
         self.__service.events().delete(calendarId=self.__calendar_id, eventId=event_id, sendNotifications=notify)
@@ -24,41 +23,36 @@ class EventBody:
 	
 	def __init__(self, summary, description, startTime, endTime, recurrances=None):
 		obj = {
-			'attendees' : [{ 'email' : 'dmp250net@gmail.com'}],
-			#'summary' : summary,
-			'summary' : 'This is a test',
+			'summary' : summary,
 			'location' : '501 Shaw Ct',
-			#'description' : description,
-			#'description' : 'fsdfsdfsdfsdf',
+			'description' : description,
 			'start' : {
-				#'timeZone' : 'America/New_York',
-				'dateTime' : '2015-03-10T11:00:00.000-06:00' #startTime.replace(' ', 'T')
+        'dateTime': startTime
 			},
 			'end' : {
-				#'timeZone' : 'America/New_York',
-				'dateTime' : '2015-03-10T12:00:00.000-06:00' #endTime.replace(' ', 'T')
+        'dateTime': endTime
 			}
 		}
 
 		self.obj = obj
 
 	def getSummary(self):
-		return self.obj.summary
+		return self.obj['summary']
 
 	def getDescription(self):
-		return self.obj.description
+		return self.obj['description']
 
 	def getStartTime(self):
-		return self.obj.startTime
+		return self.obj['startTime']
 
 	def getEndTime(self):
-		return self.obj.endTime
+		return self.obj['endTime']
 
 	def getRecurrances(self):
-		return self.obj.recurrances
+		return self.obj['recurrances']
 
 	def hasRecurrances(self):
-		return not self.obj.recurrances == None
+		return not self.obj['recurrances'] == None
 	
 	def getObj(self):
 		print "OBJ: ",self.obj 
