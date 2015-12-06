@@ -65,3 +65,21 @@ class EventBody:
 		return self.obj
 
 
+if __name__ == "__main__":
+    a = {
+            "end": {
+                'dateTime': "2015-12-05T23:00:00",
+                "timeZone": 'UTC'
+            },
+            "start": {
+                'dateTime': "2015-12-05T18:00:00",
+                "timeZone": 'UTC'
+            },
+            "calendarId": 'uas.events.tester@gmail.com',
+            "summary": 'moo cow',
+            "description": 'just a test',
+            "location": '1234'
+        };
+
+    api = UASCalendar()
+    api.create_event(a)
