@@ -6,3 +6,4 @@
 *.pyc
 *.pem
 *.swp
+**/*/client_secrets.json
