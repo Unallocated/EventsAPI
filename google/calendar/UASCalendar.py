@@ -51,17 +51,22 @@ class UASCalendar:
 
 class EventBody:
 	"""A class to describe a calendar event"""
-	def __init__(self, summary, description, startTime, endTime, recurrances=None):
+	def __init__(self, summary, description, startTime, endTime, location='501 Shaw Ct, Severn, MD', recurrences=None):
+		allowed_recurrence = ["daily", "weekly", "monthly", "yearly"]
+		if not recurrences in allowed_recurrence:
+			raise ValueError("That is not an allowed value for recurrence")
+
 		obj = {
 			'summary' : summary,
-			'location' : '501 Shaw Ct, Severn, MD',
+			'location' : location,
 			'description' : description,
 			'start' : {
-				'dateTime': startTime
+				'dateTime': startTime.replace(" ", "T")
 			},
 			'end' : {
-				'dateTime': endTime
-			}
+				'dateTime': endTime.replace(" ", "T")
+			},
+			'recurrence' : 'RRULE:FREQ=' + recurrences.upper() + ';'
 		}
 
 		self.obj = obj
@@ -73,16 +78,19 @@ class EventBody:
 		return self.obj['description']
 
 	def getStartTime(self):
-		return self.obj['startTime']
+		return self.obj['start']['dateTime']
 
 	def getEndTime(self):
-		return self.obj['endTime']
+		return self.obj['end']['dateTime']
 
-	def getRecurrances(self):
-		return self.obj['recurrances']
+	def getrecurrences(self):
+		return self.obj['recurrences']
 
-	def hasRecurrances(self):
-		return not self.obj['recurrances'] == None
+	def hasrecurrences(self):
+		return not self.obj['recurrence'] == None
+
+	def getrecurrence(self):
+		return self.obj['recurrence']
 
 	def getObj(self):
 		"""For debugging: returns the internal representation of the EventBody"""
