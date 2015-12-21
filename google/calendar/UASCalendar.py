@@ -1,29 +1,40 @@
 from authenticate import GoogleAuthentication
 
 class UASCalendar:
-	__calendar_id = 'uas.events.tester@gmail.com'
-	google = GoogleAuthentication("gauth.cfg")
-	__service = google.authenticate(app="calendar", version='v3', scope='profile https://www.googleapis.com/auth/calendar')
-	
-	def create_calendar(self, calendarName):
-		resp = self.__service.calendars().insert(body={'summary': calendarName, 'timeZone' : 'America/New_York'}).execute()
-		return resp
+	"""A class to interact with the Google Calendar API v3"""
+	def __init__(self):
+		"""Authenticates with google and selects the calendar to act on"""
+		google = GoogleAuthentication("gauth.cfg")
+		self.__service = google.authenticate(app="calendar", version='v3', scope='profile https://www.googleapis.com/auth/calendar')
+		self.__calendar_id = self.__get_primary_calendar()['id']
 
 	def list_calendars(self):
+		"""Returns the list of calendars associated with the authenticated account"""
+		calendars = []
 		page_token = None
 		while True:
 			calendar_list = self.__service.calendarList().list(pageToken=page_token).execute()
-			print calendar_list
 			for calendar_list_entry in calendar_list['items']:
-				print calendar_list_entry["summary"]
+				calendars.append(calendar_list_entry)
 				page_token = calendar_list.get('nextPageToken')
-				print page_token
 			if not page_token:
 				break
 
-	def get_calendar(self):
-		calendar = self.__service.calendars().get(calendarId='uas.events.tester@gmail.com').execute()
-		print calendar
+		return calendars
+
+	def __get_primary_calendar(self):
+		"""Private: Returns the primary calendar in the account"""
+		primary_calendar = None
+		calendars = self.list_calendars()
+		for calendar in calendars:
+			try:
+				calendar["primary"]
+				primary_calendar=calendar
+				break
+			except KeyError:
+				pass
+
+		return primary_calendar
 
 	def create_event(self, event_body, notify=False):
 		event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body.toJSON()).execute()
