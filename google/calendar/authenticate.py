@@ -12,14 +12,14 @@ class GoogleAuthentication:
 		config = {}
 		execfile(configLocation, config)
 
-		self.clientEmail = config['email']
-		self.keyFile = config['keyFile']
-		self.keyPass = config['keyPassword']
+		self.client_secrets = config['client_secrets']
+		self.credential_file = config['credential_file']
+
 
 	def authenticate(self, app, version, scope, sub=None):
 		"""Perform OAuth2 with Google to get an access token"""
-		storage = Storage('.credential_file') 
-		flow = client.flow_from_clientsecrets('client_secrets.json', scope="profile https://www.googleapis.com/auth/calendar", redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+		storage = Storage(self.credential_file) 
+		flow = client.flow_from_clientsecrets(self.client_secrets, scope="profile https://www.googleapis.com/auth/calendar", redirect_uri='urn:ietf:wg:oauth:2.0:oob')
 		
 		if storage.get():
 			credentials = storage.get()
