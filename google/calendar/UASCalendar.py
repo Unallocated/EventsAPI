@@ -1,67 +1,86 @@
 from authenticate import GoogleAuthentication
 
 class UASCalendar:
-	__calendar_id = 'uas.events.tester@gmail.com'
-	google = GoogleAuthentication("gauth.cfg")
-	__service = google.authenticate(app="calendar", version='v3', scope='profile https://www.googleapis.com/auth/calendar')
-	
-	def create_calendar(self, calendarName):
-		resp = self.__service.calendars().insert(body={'summary': calendarName, 'timeZone' : 'America/New_York'}).execute()
-		return resp
+	"""A class to interact with the Google Calendar API v3"""
+	def __init__(self):
+		"""Authenticates with google and selects the calendar to act on"""
+		google = GoogleAuthentication("gauth.cfg")
+		self.__service = google.authenticate(app="calendar", version='v3', scope='profile https://www.googleapis.com/auth/calendar')
+		self.__calendar_id = self.__get_primary_calendar()['id']
 
 	def list_calendars(self):
+		"""Returns the list of calendars associated with the authenticated account"""
+		calendars = []
 		page_token = None
 		while True:
 			calendar_list = self.__service.calendarList().list(pageToken=page_token).execute()
-			print calendar_list
 			for calendar_list_entry in calendar_list['items']:
-				print calendar_list_entry["summary"]
+				calendars.append(calendar_list_entry)
 				page_token = calendar_list.get('nextPageToken')
-				print page_token
 			if not page_token:
 				break
 
-	def get_calendar(self):
-		calendar = self.__service.calendars().get(calendarId='uas.events.tester@gmail.com').execute()
-		print calendar
+		return calendars
+
+	def __get_primary_calendar(self):
+		"""Private: Returns the primary calendar in the account"""
+		primary_calendar = None
+		calendars = self.list_calendars()
+		for calendar in calendars:
+			try:
+				calendar["primary"]
+				primary_calendar=calendar
+				break
+			except KeyError:
+				pass
+
+		return primary_calendar
 
 	def create_event(self, event_body, notify=False):
-		event = self.__service.events().insert(calendarId=self.__calendar_id, body=event_body.toJSON()).execute()
-		print event.get('htmlLink')
-		return event
+		"""Takes an `EventBody` object and posts it to the calendar
 
-	def delete_event(self, event_id, notify=False):
+		Returns the event object from Google which includes a link to the event
+		"""
+		return self.__service.events().insert(calendarId=self.__calendar_id, body=event_body.toJSON()).execute()
+
+	def delete_event(self, event_id, notify=True):
+		"""Takes an event_id and deletes it"""
 		self.__service.events().delete(calendarId=self.__calendar_id, eventId=event_id, sendNotifications=notify)
 
-	def delete_events(self, event_id_list, notify=False):
-		for eventt_id in event_id_list:
-			self.delete_event(eventId=event_id, notify=true)
+	def delete_events(self, event_id_list, notify=True):
+		"""The same as `delete_event` except for multiple events"""
+		for event_id in event_id_list:
+			self.delete_event(eventId=event_id, notify=notify)
 	
 	def list_events(self):
+		"""This lists all of the events in the calendar.  Be warned, this can be a lot!"""
 		pageToken = None
 		resp = self.__service.events().list(calendarId=self.__calendar_id, pageToken=pageToken).execute()
-		for i in resp['items']:
-			if 'end' in i and 'timeZone' in i['end'] and 'description' in i and 'htmlLink' in i:
-				print '%s :::: %s :::: %s :::: %s :::: %s to %s' % (i['end']['timeZone'], i['description'], i['created'], i['htmlLink'], i['start']['dateTime'], i['end']['dateTime'])
+		return resp['items']
 
-
-	def update_event(self, event_id, event_body, notify=False):
+	def update_event(self, event_id, event_body, notify=True):
+		"""Takes an event_id and a new `EventBody` and updates the event_id to the new event details"""
 		return self.__service.events().update(calendarId=self.__calendar_id, eventId=event_id, body=event_body.toJSON(), sendNotifications=notify).execute()
 
 
 class EventBody:
-	"""A class to describe a calendar event"""
-	def __init__(self, summary, description, startTime, endTime, recurrances=None):
+	"""A class to describe a Google calendar event"""
+	def __init__(self, summary, description, startTime, endTime, location='501 Shaw Ct, Severn, MD', recurrences=None):
+		allowed_recurrence = ["daily", "weekly", "monthly", "yearly"]
+		if not recurrences in allowed_recurrence:
+			raise ValueError("That is not an allowed value for recurrence")
+
 		obj = {
 			'summary' : summary,
-			'location' : '501 Shaw Ct, Severn, MD',
+			'location' : location,
 			'description' : description,
 			'start' : {
-				'dateTime': startTime
+				'dateTime': startTime.replace(" ", "T")
 			},
 			'end' : {
-				'dateTime': endTime
-			}
+				'dateTime': endTime.replace(" ", "T")
+			},
+			'recurrence' : 'RRULE:FREQ=' + recurrences.upper() + ';'
 		}
 
 		self.obj = obj
@@ -73,16 +92,19 @@ class EventBody:
 		return self.obj['description']
 
 	def getStartTime(self):
-		return self.obj['startTime']
+		return self.obj['start']['dateTime']
 
 	def getEndTime(self):
-		return self.obj['endTime']
+		return self.obj['end']['dateTime']
 
-	def getRecurrances(self):
-		return self.obj['recurrances']
+	def getrecurrences(self):
+		return self.obj['recurrences']
 
-	def hasRecurrances(self):
-		return not self.obj['recurrances'] == None
+	def hasrecurrences(self):
+		return not self.obj['recurrence'] == None
+
+	def getrecurrence(self):
+		return self.obj['recurrence']
 
 	def getObj(self):
 		"""For debugging: returns the internal representation of the EventBody"""
@@ -91,27 +113,3 @@ class EventBody:
 
 	def toJSON(self):
 		return self.obj
-
-
-if __name__ == "__main__":
-	import datetime
-
-	currentDate = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-	a = {
-			"end": {
-				'dateTime': currentDate,
-				"timeZone": 'EST'
-			},
-			"start": {
-				'dateTime': currentDate,
-				"timeZone": 'EST'
-			},
-			"calendarId": 'uaas.events.tester@gmail.com',
-			"summary": 'moo cow',
-			"description": 'just a test',
-			"location": '1234'
-		};
-
-	e = EventBody(summary='moo cow summary', description='moo cow description', startTime='2015-12-05T11:00:00', endTime='2015-12-05T12:00:00')
-	api = UASCalendar()
-	api.create_event(e)
